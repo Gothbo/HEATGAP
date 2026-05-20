@@ -1,0 +1,98 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Food {
+  id        String   @id @default(uuid())
+  name      String
+  category  String
+  calories  Float
+  protein   Float
+  fat       Float
+  carbs     Float
+  isBuiltIn Boolean  @default(true)
+  createdAt DateTime @default(now())
+}
+
+model MealEntry {
+  id        String   @id @default(uuid())
+  userId    String
+  date      DateTime
+  foodName  String
+  weight    Float
+  calories  Float
+  protein   Float
+  fat       Float
+  carbs     Float
+  isCustom  Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model WorkoutPlan {
+  id        String       @id @default(uuid())
+  name      String
+  userId    String?
+  isBuiltIn Boolean      @default(true)
+  createdAt DateTime     @default(now())
+  days      WorkoutDay[]
+}
+
+model WorkoutDay {
+  id        String           @id @default(uuid())
+  planId    String
+  name      String
+  sortOrder Int
+  plan      WorkoutPlan      @relation(fields: [planId], references: [id], onDelete: Cascade)
+  exercises Exercise[]
+  sessions  WorkoutSession[]
+}
+
+model Exercise {
+  id        String         @id @default(uuid())
+  dayId     String
+  name      String
+  sets      Int
+  reps      String
+  met       Float
+  rpe       String?
+  sortOrder Int
+  day       WorkoutDay     @relation(fields: [dayId], references: [id], onDelete: Cascade)
+  logs      ExerciseLog[]
+}
+
+model WorkoutSession {
+  id            String        @id @default(uuid())
+  userId        String
+  date          DateTime
+  dayId         String
+  totalCalories Float
+  day           WorkoutDay    @relation(fields: [dayId], references: [id])
+  exerciseLogs  ExerciseLog[]
+  createdAt     DateTime      @default(now())
+}
+
+model ExerciseLog {
+  id         String         @id @default(uuid())
+  sessionId  String
+  exerciseId String
+  weight     Float
+  sets       Int
+  reps       String
+  calories   Float
+  session    WorkoutSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  exercise   Exercise       @relation(fields: [exerciseId], references: [id])
+}
+
+model WeightRecord {
+  id        String   @id @default(uuid())
+  userId    String
+  date      DateTime
+  weight    Float
+  bodyFat   Float?
+  createdAt DateTime @default(now())
+}
